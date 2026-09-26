@@ -1575,7 +1575,7 @@ class Component extends DCLogic {
         complaintText: r.complaint == null ? '—' : String(r.complaint),
         complaintColor: r.complaint ? '#d69696' : 'rgba(233,233,237,.3)',
         qscText: r[s.qscMode] == null ? '—' : r[s.qscMode].toFixed(2),
-        qscColor: r[s.qscMode] == null ? 'rgba(233,233,237,.3)' : (r[s.qscMode] >= 85 ? '#8fd0a5' : '#d9b36a'),
+        qscColor: r[s.qscMode] == null ? 'rgba(233,233,237,.3)' : (r[s.qscMode] >= (s.qscMode === 'online' ? 80 : 85) ? '#8fd0a5' : '#d9b36a'),
         onOpen: () => this.openMon(r.code)
       })),
 
@@ -1620,7 +1620,7 @@ class Component extends DCLogic {
         onsite: r.onsite == null ? '' : r.onsite.toFixed(2),
         onsiteColor: r.onsite == null ? '#1b1d2b' : (r.onsite >= 85 ? '#1d6b38' : '#c0443f'),
         online: r.online == null ? '' : r.online.toFixed(2),
-        onlineColor: r.online == null ? '#1b1d2b' : (r.online >= 85 ? '#1d6b38' : '#c0443f')
+        onlineColor: r.online == null ? '#1b1d2b' : (r.online >= 80 ? '#1d6b38' : '#c0443f')
       })),
       repTotal: {
         code: 'รวมทุกสาขา',
