@@ -613,7 +613,7 @@
                 <tr>
                   <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:center;font-weight:600">{{ r.code }}</td>
                   <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:right">{{ r.target }}</td>
-                  <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:right;background:#fbdcdc;color:#9a2c2c">{{ r.mtd }}</td>
+                  <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:right;color:{{ r.mtdColor }};font-weight:{{ r.mtdWeight }}">{{ r.mtd }}</td>
                   <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:right;background:{{ r.pctBg }};color:{{ r.pctColor }}">{{ r.pct }}</td>
                   <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:right;background:#fbdcdc;color:#9a2c2c">{{ r.gap }}</td>
                   <td style="border:1px solid #cfd4e0;padding:5px 7px;text-align:right">{{ r.avgDone }}</td>
@@ -1603,6 +1603,8 @@ class Component extends DCLogic {
       repRows: rep.rows.map(r => ({
         code: r.code,
         target: fmt(r.target), mtd: fmt(r.mtd),
+        mtdColor: (rep.days.total && r.pct < rep.days.done / rep.days.total * 100) ? '#c62828' : '#1b1d2b',
+        mtdWeight: (rep.days.total && r.pct < rep.days.done / rep.days.total * 100) ? '700' : '400',
         pct: r.pct.toFixed(1) + '%',
         pctBg: r.pct >= 75 ? '#d8efdf' : '#fbdcdc',
         pctColor: r.pct >= 75 ? '#1d6b38' : '#9a2c2c',
