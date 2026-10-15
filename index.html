@@ -600,6 +600,19 @@
           <button onClick="{{ closeMon }}" style="width:30px;height:30px;border-radius:8px;border:1px solid rgba(233,233,237,.14);background:transparent;color:#e9e9ed;font-size:14.5px;cursor:pointer;flex:none">✕</button>
         </div>
 
+        <div style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid rgba(233,233,237,.1);border-radius:8px">
+          <div style="padding:8px 10px">
+            <div style="font-size:12px;color:rgba(233,233,237,.5)">ต้องทำ/วัน · ปิดเดือน</div>
+            <div style="margin-top:2px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:19px;font-weight:600;color:#e9e9ed">{{ monNeedM }}</div>
+            <div style="margin-top:1px;font-size:11px;color:rgba(233,233,237,.45)">{{ monNeedMNote }}</div>
+          </div>
+          <div style="padding:8px 10px;border-left:1px solid rgba(233,233,237,.1)">
+            <div style="font-size:12px;color:rgba(233,233,237,.5)">ต้องทำ/วัน · {{ monNeedQLabel }}</div>
+            <div style="margin-top:2px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:19px;font-weight:600;color:#cfc8f2">{{ monNeedQ }}</div>
+            <div style="margin-top:1px;font-size:11px;color:rgba(233,233,237,.45)">{{ monNeedQNote }}</div>
+          </div>
+        </div>
+
         <div style="margin-top:14px;font-size:13.5px;color:rgba(233,233,237,.55)">จำนวน Complaint เดือนนี้</div>
         <input type="text" inputmode="numeric" value="{{ monComplaint }}" onChange="{{ setMonComplaint }}" placeholder="0" style="width:100%;box-sizing:border-box;margin-top:5px;padding:9.4px;border-radius:8px;border:1px solid rgba(233,233,237,.14);background:rgba(233,233,237,.03);color:#e9e9ed;font-size:21px;font-weight:700;font-variant-numeric:tabular-nums">
 
@@ -898,6 +911,7 @@ class Component extends DCLogic {
     const prev = TODAY.m ? { y: TODAY.y, m: TODAY.m - 1 } : { y: TODAY.y - 1, m: 11 };
     const ed = this.state.entryDate;
     const want = [{ y: TODAY.y, m: TODAY.m }, prev, { y: ed.y, m: ed.m }, { y: TODAY.y, m: this.state.histMonth }];
+    for (let qm = TODAY.m - TODAY.m % 3; qm < TODAY.m; qm++) want.push({ y: TODAY.y, m: qm });
     const seen = {};
     for (const w of want) {
       const k = w.y + '-' + w.m;
@@ -1229,6 +1243,20 @@ class Component extends DCLogic {
       colLabel: this.colCycle().label,
       days: { done: asOf, total: n, left: n - asOf, leftWd: leftWd, leftWe: leftWe }
     };
+  }
+
+  closeNeed(code, row) {
+    const y = TODAY.y, m = TODAY.m, n = daysIn(y, m), asOf = this.asOfDay(y, m);
+    const leftM = n - asOf, q0 = m - m % 3;
+    let qTarget = 0, qDone = 0, leftQ = leftM;
+    for (let qm = q0; qm < q0 + 3; qm++) {
+      qTarget += this.target(code, qm);
+      if (qm < m) { for (let d = 1; d <= daysIn(y, qm); d++) qDone += this.val(y, qm, d, code); }
+      else if (qm === m) qDone += row.mtd;
+      else leftQ += daysIn(y, qm);
+    }
+    const mGap = Math.max(0, row.target - row.mtd), qGap = Math.max(0, qTarget - qDone);
+    return { mGap, leftM, mPer: leftM ? mGap / leftM : 0, qGap, leftQ, qPer: leftQ ? qGap / leftQ : 0, q: 'Q' + (q0 / 3 + 1) };
   }
 
   target(code, m) { const r = this.state.targets[code]; return (r && r[m]) || 0; }
@@ -1666,6 +1694,18 @@ class Component extends DCLogic {
 
       monEditOpen: s.mEdit != null,
       monEditTitle: s.mEdit ? s.mEdit + ' · ' + MONTHS[m] : '',
+      ...(() => {
+        const row = s.mEdit && rep.rows.find(r => r.code === s.mEdit);
+        if (!row) return { monNeedM: '–', monNeedMNote: '', monNeedQ: '–', monNeedQNote: '', monNeedQLabel: 'ปิด Q' };
+        const c = this.closeNeed(s.mEdit, row);
+        return {
+          monNeedM: c.mGap ? fmt(c.mPer) : 'ถึงเป้าแล้ว',
+          monNeedMNote: c.mGap ? 'ขาด ' + fmt(c.mGap) + ' · เหลือ ' + c.leftM + ' วัน' : '',
+          monNeedQLabel: 'ปิด ' + c.q,
+          monNeedQ: c.qGap ? fmt(c.qPer) : 'ถึงเป้าแล้ว',
+          monNeedQNote: c.qGap ? 'ขาด ' + fmt(c.qGap) + ' · เหลือ ' + c.leftQ + ' วัน' : '',
+        };
+      })(),
       monComplaint: s.mBuf.complaint,
       monQsc: s.mBuf.qsc,
       setMonComplaint: ev => this.setState({ mBuf: Object.assign({}, this.state.mBuf, { complaint: ev.target.value.replace(/[^0-9]/g, '') }) }),
