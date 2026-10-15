@@ -1248,15 +1248,16 @@ class Component extends DCLogic {
   closeNeed(code, row) {
     const y = TODAY.y, m = TODAY.m, n = daysIn(y, m), asOf = this.asOfDay(y, m);
     const leftM = n - asOf, q0 = m - m % 3;
-    let qTarget = 0, qDone = 0, leftQ = leftM;
+    let qTarget = 0, qDone = 0, leftQ = leftM, qMissing = false;
     for (let qm = q0; qm < q0 + 3; qm++) {
+      if (!this.target(code, qm)) qMissing = true;
       qTarget += this.target(code, qm);
       if (qm < m) { for (let d = 1; d <= daysIn(y, qm); d++) qDone += this.val(y, qm, d, code); }
       else if (qm === m) qDone += row.mtd;
       else leftQ += daysIn(y, qm);
     }
     const mGap = Math.max(0, row.target - row.mtd), qGap = Math.max(0, qTarget - qDone);
-    return { mGap, leftM, mPer: leftM ? mGap / leftM : 0, qGap, leftQ, qPer: leftQ ? qGap / leftQ : 0, q: 'Q' + (q0 / 3 + 1) };
+    return { mNoTarget: !row.target, qMissing, mGap, leftM, mPer: leftM ? mGap / leftM : 0, qGap, leftQ, qPer: leftQ ? qGap / leftQ : 0, q: 'Q' + (q0 / 3 + 1) };
   }
 
   target(code, m) { const r = this.state.targets[code]; return (r && r[m]) || 0; }
@@ -1699,11 +1700,11 @@ class Component extends DCLogic {
         if (!row) return { monNeedM: '–', monNeedMNote: '', monNeedQ: '–', monNeedQNote: '', monNeedQLabel: 'ปิด Q' };
         const c = this.closeNeed(s.mEdit, row);
         return {
-          monNeedM: c.mGap ? fmt(c.mPer) : 'ถึงเป้าแล้ว',
-          monNeedMNote: c.mGap ? 'ขาด ' + fmt(c.mGap) + ' · เหลือ ' + c.leftM + ' วัน' : '',
+          monNeedM: c.mNoTarget ? '–' : c.mGap ? fmt(c.mPer) : 'ถึงเป้าแล้ว',
+          monNeedMNote: c.mNoTarget ? 'ยังไม่ตั้งเป้าเดือนนี้' : c.mGap ? 'ขาด ' + fmt(c.mGap) + ' · เหลือ ' + c.leftM + ' วัน' : '',
           monNeedQLabel: 'ปิด ' + c.q,
-          monNeedQ: c.qGap ? fmt(c.qPer) : 'ถึงเป้าแล้ว',
-          monNeedQNote: c.qGap ? 'ขาด ' + fmt(c.qGap) + ' · เหลือ ' + c.leftQ + ' วัน' : '',
+          monNeedQ: c.qMissing ? '–' : c.qGap ? fmt(c.qPer) : 'ถึงเป้าแล้ว',
+          monNeedQNote: c.qMissing ? 'ตั้งเป้า ' + c.q + ' ไม่ครบ 3 เดือน' : c.qGap ? 'ขาด ' + fmt(c.qGap) + ' · เหลือ ' + c.leftQ + ' วัน' : '',
         };
       })(),
       monComplaint: s.mBuf.complaint,
