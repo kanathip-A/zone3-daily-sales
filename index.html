@@ -28,6 +28,10 @@
   @keyframes pop{0%{transform:scale(.9) translateY(10px);opacity:0}60%{transform:scale(1.02);opacity:1}100%{transform:scale(1)}}
   @keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
   @keyframes glow{0%,100%{opacity:.5}50%{opacity:.85}}
+  @keyframes tick{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(233,233,237,0)}50%{opacity:.6;box-shadow:0 0 8px 2px rgba(233,233,237,.5)}}
+  @keyframes warn{0%,100%{box-shadow:0 0 0 0 rgba(227,154,154,0)}50%{box-shadow:0 0 0 4px rgba(227,154,154,.2)}}
+  @keyframes ping{0%{box-shadow:0 0 0 0 rgba(143,208,165,.6)}100%{box-shadow:0 0 0 7px rgba(143,208,165,0)}}
+  @media (prefers-reduced-motion:reduce){*{animation-iteration-count:1 !important}}
   @keyframes sheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
   @media print{
     @page{size:A4 landscape;margin:10mm}
@@ -50,7 +54,7 @@
 
   <div style="display:flex;align-items:center;justify-content:space-between;padding:6.8px 14.4px 0;font-size:13.5px;position:relative;z-index:2;color:rgba(233,233,237,.45)">
     <button onClick="{{ syncNow }}" style="background:transparent;border:0;padding:0;color:rgba(233,233,237,.55);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px" style-hover="color:#e9e9ed">↻ {{ syncNowLabel }}</button>
-    <span style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:{{ syncDot }}"></span>{{ syncLabel }}</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:{{ syncDot }};animation:{{ syncAnim }}"></span>{{ syncLabel }}</span>
   </div>
 
   <sc-if value="{{ isBranches }}" hint-placeholder-val="{{ true }}">
@@ -84,7 +88,7 @@
       <div style="margin-top:14px;padding:11px 12px 12px;border-radius:12px;border:1px solid rgba(145,132,217,.2);background:linear-gradient(180deg,rgba(145,132,217,.09),rgba(145,132,217,.02))">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
           <span style="font-size:12.5px;color:rgba(233,233,237,.55)">ทั้งโซน · {{ monthTitle }}</span>
-          <span style="padding:1px 7px;border-radius:999px;background:{{ monthPaceBg }};color:{{ monthPctColor }};font-size:12px;font-weight:600">{{ monthPaceText }}</span>
+          <span style="padding:1px 7px;border-radius:999px;background:{{ monthPaceBg }};animation:{{ monthPaceAnim }};color:{{ monthPctColor }};font-size:12px;font-weight:600">{{ monthPaceText }}</span>
         </div>
         <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px">
           <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:28px;font-weight:600;letter-spacing:-.02em;color:{{ monthPctColor }}">{{ monthPctText }}</span>
@@ -92,7 +96,7 @@
         </div>
         <div style="position:relative;height:6px;border-radius:999px;background:rgba(233,233,237,.08);margin-top:8px">
           <div style="position:absolute;left:0;top:0;bottom:0;width:{{ monthBar }}%;border-radius:999px;background:{{ monthPctColor }}"></div>
-          <div style="position:absolute;left:{{ monthPaceLeft }}%;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:#e9e9ed"></div>
+          <div style="position:absolute;left:{{ monthPaceLeft }}%;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:#e9e9ed;animation:tick 2.2s ease-in-out infinite"></div>
         </div>
       </div>
 
@@ -358,7 +362,7 @@
       <div style="margin:12px 14.4px 0;padding:13px 14px 0;border-radius:12px;border:1px solid rgba(145,132,217,.22);background:linear-gradient(180deg,rgba(145,132,217,.11),rgba(145,132,217,.02));overflow:hidden">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <span style="font-size:13px;color:rgba(233,233,237,.6)">% MTD เทียบเป้า · ทั้งโซน</span>
-          <span style="padding:2px 8px;border-radius:999px;background:{{ monthPaceBg }};color:{{ monthPctColor }};font-size:12.5px;font-weight:600">{{ monthPaceText }}</span>
+          <span style="padding:2px 8px;border-radius:999px;background:{{ monthPaceBg }};animation:{{ monthPaceAnim }};color:{{ monthPctColor }};font-size:12.5px;font-weight:600">{{ monthPaceText }}</span>
         </div>
         <div style="margin-top:4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:46px;line-height:1.1;font-weight:600;letter-spacing:-.03em;color:{{ monthPctColor }}">{{ monthPctText }}</div>
         <div style="margin-top:2px;font-size:13px;color:rgba(233,233,237,.5)"><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;color:#e9e9ed">{{ monthMtdText }}</span> จากเป้า <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">{{ monthTargetText }}</span></div>
@@ -366,7 +370,7 @@
           <div style="position:absolute;left:{{ monthPaceLabelLeft }}%;bottom:12px;transform:translateX(-50%);font-size:11px;white-space:nowrap;color:rgba(233,233,237,.7)">Time gone {{ monthTimeGone }}</div>
           <div style="position:relative;height:8px;border-radius:999px;background:rgba(233,233,237,.08)">
             <div style="position:absolute;left:0;top:0;bottom:0;width:{{ monthBar }}%;border-radius:999px;background:{{ monthPctColor }}"></div>
-            <div style="position:absolute;left:{{ monthPaceLeft }}%;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:#e9e9ed"></div>
+            <div style="position:absolute;left:{{ monthPaceLeft }}%;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:#e9e9ed;animation:tick 2.2s ease-in-out infinite"></div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;margin:14px -14px 0;border-top:1px solid rgba(233,233,237,.08)">
@@ -394,9 +398,16 @@
           <div style="font-size:12px;color:rgba(233,233,237,.45)">QSC Online <span style="opacity:.7">· 80</span></div>
           <div style="margin-top:2px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:17px;font-weight:600">{{ qscOnlineText }}</div>
         </div>
-        <div style="grid-column:1 / -1;display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:8px 10px;border-top:1px solid rgba(233,233,237,.08)">
-          <span style="font-size:12px;color:rgba(233,233,237,.45)">COL รอบ {{ colLabel }} <span style="white-space:nowrap">· ex VAT</span></span>
-          <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:17px;font-weight:600">{{ colTotalText }}</span>
+        <div style="grid-column:1 / -1;padding:8px 10px 10px;border-top:1px solid rgba(233,233,237,.08)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+            <span style="font-size:12px;color:rgba(233,233,237,.45)">COL รอบ {{ colLabel }} <span style="white-space:nowrap">· ex VAT</span></span>
+            <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:17px;font-weight:600">{{ colTotalText }}</span>
+          </div>
+          <div style="display:flex;gap:4px;overflow-x:auto;margin-top:8px;scrollbar-width:none">
+            <sc-for list="{{ colChips }}" as="c" hint-placeholder-count="9">
+              <button onClick="{{ c.onPick }}" style="flex:none;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
         </div>
       </div>
 
@@ -812,6 +823,7 @@ const hm2 = t => pad(t.getHours()) + ':' + pad(t.getMinutes());
 class Component extends DCLogic {
   state = {
     tab: 'entry',
+    colBranch: null,
     screen: 'branches',
     selected: BRANCHES.map(b => b.code),
     bi: 0, si: 0, buf: '',
@@ -1482,7 +1494,12 @@ class Component extends DCLogic {
       startLabel: (s.selected.length && s.selected.every(c => isFilled(this.entry(c))) ? 'แก้ไขยอด ' : 'เริ่มกรอก ') + s.selected.length + ' สาขา',
       photoFolder: cur.code + '/' + edIso.slice(0, 7),
       colLabel: rep.colLabel,
-      colTotalText: fmt(rep.total.col),
+      colTotalText: fmt((rep.rows.find(r => r.code === (s.colBranch || BRANCHES[0].code)) || {}).col || 0),
+      colChips: BRANCHES.map(b => {
+        const on = b.code === (s.colBranch || BRANCHES[0].code);
+        return { label: b.code, onPick: () => this.setState({ colBranch: b.code }),
+          bg: on ? 'rgba(145,132,217,.16)' : 'transparent', color: on ? '#cfc8f2' : 'rgba(233,233,237,.5)', border: on ? '#9184d9' : 'rgba(233,233,237,.12)' };
+      }),
       syncNow: () => { if (this.connected) this.refresh(); else this.setState({ tab: 'settings', setTab: 'connect' }); },
       syncNowLabel: this.connected ? (s.syncing ? 'กำลังอัปเดต…' : 'อัปเดตยอดล่าสุด') : 'ยังไม่เชื่อมต่อชีต',
       showTabBar: !(s.tab === 'entry' && s.screen === 'entry'),
@@ -1614,6 +1631,8 @@ class Component extends DCLogic {
       monthNeedText: fmt(Math.max(0, rep.total.target - rep.total.mtd) / Math.max(1, rep.days.left)),
       monthNeedLabel: 'ต้องทำ/วัน · เหลือ ' + rep.days.left + ' วัน',
       monthPaceText: (rep.total.pct - tg >= 0 ? 'นำ ' : 'ตาม ') + Math.abs(rep.total.pct - tg).toFixed(1) + ' จุด',
+      monthPaceAnim: rep.total.pct >= tg ? 'none' : 'warn 2.4s ease-in-out infinite',
+      syncAnim: this.connected && !s.syncing ? 'ping 2s cubic-bezier(.23,1,.32,1) infinite' : 'none',
       monthPaceBg: rep.total.pct >= tg ? 'rgba(143,208,165,.12)' : 'rgba(227,154,154,.12)',
       monthAheadCount: rep.rows.filter(r => r.pct >= tg).length + '/' + rep.rows.length + ' สาขาถึง Time gone',
       complaintTotalText: String(rep.total.complaint || 0),
